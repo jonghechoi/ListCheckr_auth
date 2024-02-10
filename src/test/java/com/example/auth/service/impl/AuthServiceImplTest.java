@@ -1,6 +1,7 @@
 package com.example.auth.service.impl;
 
 import com.example.auth.domain.User;
+import com.example.auth.domain.UserRoleEnum;
 import com.example.auth.domain.dto.IdAndPassword;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +30,7 @@ class AuthServiceImplTest {
         idAndPassword.setUid("sosinnmi");
         idAndPassword.setPassword("1234");
 
-        User userExpect = new User(Long.valueOf(1), "sosinnmi", "1234", "choi");
+        User userExpect = new User("sosinnmi", "1234", "choi", UserRoleEnum.USER);
 
         // when
         ValueOperations<String, UserRequestDtoFromKfaka> valueOperations = redisTemplate.opsForValue();

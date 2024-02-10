@@ -20,17 +20,28 @@ public class AuthRestController {
         this.authService = authService;
     }
 
+//    @PostMapping("/login")
+//    public ResponseEntity<String> read(@RequestBody IdAndPassword idAndPassword) {
+//        System.out.println(idAndPassword.getUid());
+//        System.out.println(idAndPassword.getPassword());
+//        System.out.println("idAndPassword --> " + idAndPassword);
+//        if(authService.loginByIdAndPassword(idAndPassword)) {
+//            return new ResponseEntity<>("ok", HttpStatus.OK);
+//        }
+//        else {
+//            return new ResponseEntity<>("no", HttpStatus.NOT_FOUND);
+//        }
+//    }
     @PostMapping("/login")
-    public ResponseEntity<String> read(@RequestBody IdAndPassword idAndPassword) {
-        boolean check = Optional.of(authService.getLoginByIdAndPassword(idAndPassword)).isPresent();
-        if(check) {
-            return new ResponseEntity<>("ok", HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity<>("no", HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<String> login() {
+        return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
+    /**
+     * Kafka로부터 전달된 인증에 필요한 정보 데이터 저장
+     * @param userRequestDtoFromKfaka
+     * @return
+     */
     @PostMapping("/login/saveTest")
     public ResponseEntity<String> saveTest(@RequestBody UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
         if(authService.save(userRequestDtoFromKfaka)) {

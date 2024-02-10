@@ -1,27 +1,28 @@
 package com.example.auth.domain;
 
-import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
-//import jakarta.persistence.Entity;
-//import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
 
 @Getter
 @Setter
-//@Entity
-@RedisHash
+@NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @Id
     private Long id;
     private String uid;
     private String password;
     private String name;
+    private UserRoleEnum role;
 
-    public User() {}
+    public User(String uid, String password, String name, UserRoleEnum role) {
+        this.uid = uid;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+    }
 
     @Override
     public String toString() {
