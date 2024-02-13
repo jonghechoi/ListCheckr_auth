@@ -28,12 +28,16 @@ public class AuthRestController {
         return new ResponseEntity<>("jwt-test success", HttpStatus.OK);
     }
 
+    @GetMapping("/login/jwt-test-refreshtoken")
+    public ResponseEntity<String> jwtRefreshTokenTest() {
+        return new ResponseEntity<>("jwt-test-refreshtoken success", HttpStatus.OK);
+    }
+
     /**
      * Kafka로부터 전달된 인증에 필요한 정보 데이터 저장 (테스트용)
      */
     @PostMapping("/login/save-test")
     public ResponseEntity<String> saveTest(@RequestBody UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
-        log.error("saveTest 메소드 등판~~");
         if(authService.save(userRequestDtoFromKfaka)) {
             return new ResponseEntity<>("ok", HttpStatus.OK);
         }

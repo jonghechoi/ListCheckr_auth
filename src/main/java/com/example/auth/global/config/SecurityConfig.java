@@ -30,13 +30,14 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-//                                .requestMatchers("/user/login").permitAll()
-//                                .requestMatchers("/**").hasRole("USER")
-                                .requestMatchers("/**").permitAll()
+                                .requestMatchers("/user/login").permitAll()
+                                .requestMatchers("/user/login/jwt-test").hasRole("USER")
+                                .requestMatchers("/user/login/jwt-test-refreshtoken").permitAll()
                 )
                 .addFilterBefore(LoginAuthenticationProcessingFilter.builder()
                         .userDetailsService(userDetailsService)
                         .passwordEncoder(encodePassword())
+                        .jwtService(jwtService)
                         .build(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationProcessingFilter(jwtService, authRepository), LoginAuthenticationProcessingFilter.class)
                 .build();

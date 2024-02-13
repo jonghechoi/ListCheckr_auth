@@ -3,12 +3,14 @@ package com.example.auth.repository;
 import com.example.auth.domain.dto.IdAndPassword;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 
+@Slf4j
 @Component
 public class AuthRepository {
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -35,8 +37,6 @@ public class AuthRepository {
     }
 
     public boolean loginByIdAndPassword(IdAndPassword idAndPassword) {
-        System.out.println("loginByIdAndPassword 메소드의 idAndPassword.getUid() ---> " + idAndPassword.getUid());
-
         Object userData = valueOperations.get(idAndPassword.getUid());
         LinkedHashMap<String, Object> userDataMap = (LinkedHashMap<String, Object>) userData;
         UserRequestDtoFromKfaka map = objectMapper.convertValue(userDataMap, UserRequestDtoFromKfaka.class);
@@ -53,8 +53,8 @@ public class AuthRepository {
         return true;
     }
 
-    public UserRequestDtoFromKfaka getUser(String username) {
-        Object userData = valueOperations.get(username);
+    public UserRequestDtoFromKfaka getUser(String uid) {
+        Object userData = valueOperations.get(uid);
         LinkedHashMap<String, Object> userDataMap = (LinkedHashMap<String, Object>) userData;
         UserRequestDtoFromKfaka map = objectMapper.convertValue(userDataMap, UserRequestDtoFromKfaka.class);
 

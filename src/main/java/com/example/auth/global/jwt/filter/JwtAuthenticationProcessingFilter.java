@@ -18,24 +18,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private static final String NO_CHECK_URL = "/user/login";
-    private static final String NO_CHECK_URL_TEST = "/user/login/save-test";
     private final JwtServiceImpl jwtService;
     private final AuthRepository authRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if(request.getRequestURI().equals(NO_CHECK_URL)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if(request.getRequestURI().equals(NO_CHECK_URL_TEST)) {
-            log.error("JwtAuthenticationProcessingFilter 필터 들어옴");
             filterChain.doFilter(request, response);
             return;
         }
@@ -48,15 +42,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             jwtService.extractUid(request) // UID Claim 추출
                     .ifPresent(uid -> {
                         UserRequestDtoFromKfaka userRequestDtoFromKfaka = authRepository.getUser(uid); // Redis에서 UID로 유저 정보 추출
-                        checkRefreshTokenAndReIssueAccessToken(response, refreshToken, userRequestDtoFromKfaka); // AccessToken 재발행
+                        checkRefreshTokenAndReIssueAccessToken(response, refreshToken, userRequestDtoFromKfaka); // AccessToken & RefreshToken 재발행
                     });
-            filterChain.doFilter(request, response);
-            return;
         }
-
-        if(refreshToken == null) {
+        else {
             checkAccessTokenAndAuthentication(request, response, filterChain);
         }
+
+        filterChain.doFilter(request, response);
     }
 
     private void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshTokenFromReq, UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
@@ -67,21 +60,18 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     }
 
     private String reIssueRefreshToken(UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
-        String reIssuedRefreshToken = jwtService.createRefreshToken();;
-        boolean checkUpdateRefreshToken = userRequestDtoFromKfaka.updateRefreshToken(reIssuedRefreshToken);
+        String reIssuedRefreshToken = jwtService.createRefreshToken();
+        userRequestDtoFromKfaka.setRefreshToken(reIssuedRefreshToken);
 
-        if(checkUpdateRefreshToken) {
+        if(authRepository.updateUser(userRequestDtoFromKfaka)) {
             return reIssuedRefreshToken;
         }
         else {
-            throw new RuntimeException("리프레시 토큰 생성 & 저장 실패~~");
+            throw new RuntimeException("RefreshToken 생성 및 저장 실패");
         }
     }
 
-    // AccessToken 체크 & 인증 처리
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("checkAccessTokenAndAuthentication() 호출");
-
         jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
                 .ifPresent(accessToken -> jwtService.extractUidByAccessToken(accessToken)

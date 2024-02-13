@@ -2,6 +2,7 @@ package com.example.auth.global.jwt.service.impl;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.example.auth.global.jwt.service.JwtService;
 import com.example.auth.repository.AuthRepository;
@@ -37,16 +38,14 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.uid.header}")
     private String uidHeader;
 
-    /**
-     * JWT 표준 스펙 지정
-     * https://javadoc.io/static/com.auth0/java-jwt/4.4.0/com/auth0/jwt/JWTCreator.Builder.html
-     */
+    /** JWT 표준 스펙 지정 */
+    // https://javadoc.io/static/com.auth0/java-jwt/4.4.0/com/auth0/jwt/JWTCreator.Builder.html
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
-    private static final String UID_CLAIM = "Uid";
+    private static final String UID_CLAIM = "sub";
     private static final String BEARER = "Bearer ";
 
-    private AuthRepository authRepository;
+    private final AuthRepository authRepository;
 
     /** AccessToken 생성 */
     @Override
@@ -115,14 +114,14 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public Optional<String> extractUidByAccessToken(String accessToken) {
         try {
-            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(accessToken)) // Verification builder return
-                            .build()
+            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretKey)) // Verification builder return
+                    .build()
                     .verify(accessToken)
                     .getClaim(UID_CLAIM)
-                    .asString()); // Creates a new and reusable instance of the JWTVerifier with the configuration already provided
+                    .asString());
         }
         catch(Exception e) {
-            log.info("액세스 토큰 '{}'이 유효하지 않습니다~~", accessToken);
+            log.info("액세스 토큰 이 유효하지 않습니다 : {}", accessToken);
             return Optional.empty();
         }
     }
@@ -141,17 +140,20 @@ public class JwtServiceImpl implements JwtService {
 
     /** RefreshToken DB 저장 및 업데이트 */
     @Override
-    public void updateRefreshToken(String uid, String refreshToken) {
+    public boolean updateRefreshToken(String uid, String refreshToken) {
         if(authRepository.isUidExist(uid)) {
             UserRequestDtoFromKfaka userRequestDtoFromKfaka = authRepository.getUser(uid);
+            userRequestDtoFromKfaka.setRefreshToken(refreshToken);
 
-            if(userRequestDtoFromKfaka.updateRefreshToken(refreshToken)) {
-                log.info("리프레시 토큰 업데이트 완료");
+            if(authRepository.updateUser(userRequestDtoFromKfaka)) {
+                log.info("RefreshToken 업데이트 완료");
+                return true;
             }
             else {
-                log.info("리프레시 토큰 업데이트 실패");
+                log.info("RefreshToken 업데이트 실패");
             }
         }
+        return false;
     }
 
     /** Token 검증 */
@@ -162,7 +164,6 @@ public class JwtServiceImpl implements JwtService {
             return true;
         }
         catch(Exception e) {
-            log.info("유효하지 않은 토큰 입니다~~");
             return false;
         }
     }

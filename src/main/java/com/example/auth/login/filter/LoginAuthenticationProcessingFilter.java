@@ -1,6 +1,7 @@
 package com.example.auth.login.filter;
 
 import com.example.auth.global.jwt.service.impl.JwtServiceImpl;
+import com.example.auth.login.service.impl.UserDetailsImpl;
 import com.example.auth.login.service.impl.UserDetailsServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,45 +28,51 @@ import java.util.Map;
 
 @Slf4j
 @Builder
-@RequiredArgsConstructor
 public class LoginAuthenticationProcessingFilter extends OncePerRequestFilter {
+    private static final String ROLE = "ROLE";
+
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtServiceImpl jwtService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Map<String, String> requestBodyMap = getBody(request);
-        String uid = requestBodyMap.get("uid");
-        String password = requestBodyMap.get("password");
+        if(request.getRequestURI().equals("/user/login")) {
+            Map<String, String> requestBodyMap = getBody(request);
+            String uid = requestBodyMap.get("uid");
+            String password = requestBodyMap.get("password");
 
-        log.error("LoginAuthenticationProcessingFilter 필터 들어옴");
-        log.error("request.getRequestURI() --> " + request.getRequestURI());
+            if(uid != null && password != null) {
+                // 유저 확인
+                UserDetails userDetails = userDetailsService.loadUserByUsername(uid);
 
-        if(uid != null && password != null && request.getRequestURI().equals("/user/login")) {
-            log.error("LoginAuthenticationProcessingFilter 필터 여기까진 다행히 안 들어옴.. 휴");
-            // 유저 확인
-            UserDetails userDetails = userDetailsService.loadUserByUsername(uid);
+                // 비밀번호 확인
+                if(!passwordEncoder.matches(password, userDetails.getPassword())) {
+                    throw new IllegalAccessError("비밀번호가 일치하지 않습니다.");
+                }
 
-            // 비밀번호 확인
-            if(!passwordEncoder.matches(password, userDetails.getPassword())) {
-                throw new IllegalAccessError("비밀번호 틀렸습니다~");
+                // 헤더에 Role 등록
+                UserDetailsImpl userDetailsImpl = (UserDetailsImpl) userDetails;
+                response.setHeader(ROLE, userDetailsImpl.getUser().getRole().getAuthority());
+
+                // 인증 객체 생성 및 등록
+                SecurityContext context = SecurityContextHolder.getContext();
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                context.setAuthentication(authentication);
+
+                SecurityContextHolder.setContext(context);
+
+                // AccessToken, RefreshToken 생성 및 헤더 추가
+                String accessToken = jwtService.createAccessToken(uid);
+                String refreshToken = jwtService.createRefreshToken();
+
+                jwtService.updateRefreshToken(uid, refreshToken);
+                jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
             }
-
-            // 인증 객체 생성 및 등록
-            SecurityContext context = SecurityContextHolder.getContext();
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            context.setAuthentication(authentication);
-
-            SecurityContextHolder.setContext(context);
-
-            // AccessToken, RefreshToken 생성 및 헤더 추가
-            String accessToken = jwtService.createAccessToken(uid);
-            String refreshToken = jwtService.createRefreshToken();
-
-            jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+            else {
+                throw new IllegalAccessError("입력한 아이디가 없거나 패스워드가 없습니다.");
+            }
         }
-
         filterChain.doFilter(request, response);
     }
 
@@ -79,8 +87,7 @@ public class LoginAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         String requestBody = stringBuilder.toString();
 
-        // requestBody를 원하는 대로 처리
-        // 예: JSON 형식의 requestBody를 Map으로 파싱
+        // JSON 형식의 requestBody를 Map으로 파싱
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> requestBodyMap = objectMapper.readValue(requestBody, new TypeReference<Map<String, String>>() {});
 
