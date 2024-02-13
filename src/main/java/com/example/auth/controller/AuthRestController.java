@@ -1,14 +1,12 @@
 package com.example.auth.controller;
 
-import com.example.auth.domain.dto.IdAndPassword;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.example.auth.service.impl.AuthServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -20,30 +18,22 @@ public class AuthRestController {
         this.authService = authService;
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<String> read(@RequestBody IdAndPassword idAndPassword) {
-//        System.out.println(idAndPassword.getUid());
-//        System.out.println(idAndPassword.getPassword());
-//        System.out.println("idAndPassword --> " + idAndPassword);
-//        if(authService.loginByIdAndPassword(idAndPassword)) {
-//            return new ResponseEntity<>("ok", HttpStatus.OK);
-//        }
-//        else {
-//            return new ResponseEntity<>("no", HttpStatus.NOT_FOUND);
-//        }
-//    }
     @PostMapping("/login")
     public ResponseEntity<String> login() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
+    @GetMapping("/login/jwt-test")
+    public ResponseEntity<String> jwtTest() {
+        return new ResponseEntity<>("jwt-test success", HttpStatus.OK);
+    }
+
     /**
-     * Kafka로부터 전달된 인증에 필요한 정보 데이터 저장
-     * @param userRequestDtoFromKfaka
-     * @return
+     * Kafka로부터 전달된 인증에 필요한 정보 데이터 저장 (테스트용)
      */
-    @PostMapping("/login/saveTest")
+    @PostMapping("/login/save-test")
     public ResponseEntity<String> saveTest(@RequestBody UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
+        log.error("saveTest 메소드 등판~~");
         if(authService.save(userRequestDtoFromKfaka)) {
             return new ResponseEntity<>("ok", HttpStatus.OK);
         }

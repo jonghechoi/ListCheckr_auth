@@ -21,6 +21,10 @@ public class AuthRepository {
     }
 
     public boolean save(UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
+        if(userRequestDtoFromKfaka.getUid() == null) {
+            return false;
+        }
+
         if(valueOperations.get(userRequestDtoFromKfaka.getUid()) != null) {
             return false;
         }
@@ -40,8 +44,8 @@ public class AuthRepository {
         return idAndPassword.getUid().equals(map.getUid()) || idAndPassword.getPassword().equals(map.getPassword());
     }
 
-    public boolean loginByIdAndPasswordTest(String username) {
-        Object userData = valueOperations.get(username);
+    public boolean isUidExist(String uid) {
+        Object userData = valueOperations.get(uid);
 
         if(userData == null) {
             return false;
@@ -49,11 +53,18 @@ public class AuthRepository {
         return true;
     }
 
-    public UserRequestDtoFromKfaka getUserPassword(String username) {
+    public UserRequestDtoFromKfaka getUser(String username) {
         Object userData = valueOperations.get(username);
         LinkedHashMap<String, Object> userDataMap = (LinkedHashMap<String, Object>) userData;
         UserRequestDtoFromKfaka map = objectMapper.convertValue(userDataMap, UserRequestDtoFromKfaka.class);
 
         return map;
+    }
+
+    public boolean updateUser(UserRequestDtoFromKfaka userRequestDtoFromKfaka) {
+        if(valueOperations.setIfPresent(userRequestDtoFromKfaka.getUid(), userRequestDtoFromKfaka)) {
+            return true;
+        }
+        return false;
     }
 }

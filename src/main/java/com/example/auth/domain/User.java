@@ -1,9 +1,8 @@
 package com.example.auth.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.example.auth.global.jwt.service.impl.JwtServiceImpl;
+import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 
 @Getter
@@ -16,12 +15,25 @@ public class User {
     private String password;
     private String name;
     private UserRoleEnum role;
+    private String refreshToken;
 
     public User(String uid, String password, String name, UserRoleEnum role) {
         this.uid = uid;
         this.password = password;
         this.name = name;
         this.role = role;
+    }
+
+    public User(String uid, String password, String name, UserRoleEnum role, String refreshToken) {
+        this.uid = uid;
+        this.password = password;
+        this.name = name;
+        this.role = role;
+        this.refreshToken = refreshToken;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.example.auth.service.impl;
+package com.example.auth.login.service.impl;
 
 import com.example.auth.domain.User;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
@@ -16,12 +16,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(!authRepository.loginByIdAndPasswordTest(username)) {
+        if(!authRepository.isUidExist(username)) {
             throw new RuntimeException("일치하는 유저가 없습니다~~~!");
         }
 
-        UserRequestDtoFromKfaka userRequestDtoFromKfaka = authRepository.getUserPassword(username);
-        User user = new User(userRequestDtoFromKfaka.getUid(), userRequestDtoFromKfaka.getPassword(), userRequestDtoFromKfaka.getName(), userRequestDtoFromKfaka.getRole());
+        UserRequestDtoFromKfaka userRequestDtoFromKfaka = authRepository.getUser(username);
+        User user = new User(userRequestDtoFromKfaka.getUid(),
+                            userRequestDtoFromKfaka.getPassword(),
+                            userRequestDtoFromKfaka.getName(),
+                            userRequestDtoFromKfaka.getRole(),
+                            userRequestDtoFromKfaka.getRefreshToken());
 
         return new UserDetailsImpl(user, user.getUid(), user.getPassword());
     }

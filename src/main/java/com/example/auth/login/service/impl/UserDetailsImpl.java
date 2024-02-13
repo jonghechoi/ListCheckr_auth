@@ -1,4 +1,4 @@
-package com.example.auth.service.impl;
+package com.example.auth.login.service.impl;
 
 import com.example.auth.domain.User;
 import com.example.auth.domain.UserRoleEnum;
@@ -11,12 +11,17 @@ import java.util.Collection;
 
 public class UserDetailsImpl implements UserDetails {
     private User user;
-    private String username;
+    private String uid;
     private String password;
 
-    public UserDetailsImpl(User user, String username, String password) {
+    public UserDetailsImpl(User user, String uid) {
         this.user = user;
-        this.username = username;
+        this.uid = uid;
+    }
+
+    public UserDetailsImpl(User user, String uid, String password) {
+        this.user = user;
+        this.uid = uid;
         this.password = password;
     }
 
@@ -43,7 +48,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.username;
+        return this.uid;
     }
 
     @Override

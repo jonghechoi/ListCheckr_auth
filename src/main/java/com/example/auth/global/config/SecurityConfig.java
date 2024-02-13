@@ -1,7 +1,10 @@
-package com.example.auth.config;
+package com.example.auth.global.config;
 
-import com.example.auth.security.CustomSecurityFilter;
-import com.example.auth.service.impl.UserDetailsServiceImpl;
+import com.example.auth.global.jwt.filter.JwtAuthenticationProcessingFilter;
+import com.example.auth.global.jwt.service.impl.JwtServiceImpl;
+import com.example.auth.login.filter.LoginAuthenticationProcessingFilter;
+import com.example.auth.login.service.impl.UserDetailsServiceImpl;
+import com.example.auth.repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +16,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
+    private final JwtServiceImpl jwtService;
+    private final AuthRepository authRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -25,11 +30,15 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers("/**")
-                                .hasRole("USER")
-//                                .permitAll()
+//                                .requestMatchers("/user/login").permitAll()
+//                                .requestMatchers("/**").hasRole("USER")
+                                .requestMatchers("/**").permitAll()
                 )
-                .addFilterBefore(new CustomSecurityFilter(userDetailsService, encodePassword()), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(LoginAuthenticationProcessingFilter.builder()
+                        .userDetailsService(userDetailsService)
+                        .passwordEncoder(encodePassword())
+                        .build(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationProcessingFilter(jwtService, authRepository), LoginAuthenticationProcessingFilter.class)
                 .build();
     }
 

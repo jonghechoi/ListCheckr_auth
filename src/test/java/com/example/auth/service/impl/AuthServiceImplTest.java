@@ -30,7 +30,7 @@ class AuthServiceImplTest {
         idAndPassword.setUid("sosinnmi");
         idAndPassword.setPassword("1234");
 
-        User userExpect = new User("sosinnmi", "1234", "choi", UserRoleEnum.USER);
+        User userExpect = new User("sosinnmi", "1234", "choi", UserRoleEnum.USER, "수정필요");
 
         // when
         ValueOperations<String, UserRequestDtoFromKfaka> valueOperations = redisTemplate.opsForValue();

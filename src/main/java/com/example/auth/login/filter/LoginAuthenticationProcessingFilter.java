@@ -1,13 +1,16 @@
-package com.example.auth.security;
+package com.example.auth.login.filter;
 
-import com.example.auth.service.impl.UserDetailsServiceImpl;
+import com.example.auth.global.jwt.service.impl.JwtServiceImpl;
+import com.example.auth.login.service.impl.UserDetailsServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -21,20 +24,27 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+@Slf4j
+@Builder
 @RequiredArgsConstructor
-public class CustomSecurityFilter extends OncePerRequestFilter {
+public class LoginAuthenticationProcessingFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtServiceImpl jwtService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Map<String, String> requestBodyMap = getBody(request);
-        String username = requestBodyMap.get("uid");
+        String uid = requestBodyMap.get("uid");
         String password = requestBodyMap.get("password");
 
-        if(username != null && password != null && request.getRequestURI().equals("/user/login")) {
+        log.error("LoginAuthenticationProcessingFilter 필터 들어옴");
+        log.error("request.getRequestURI() --> " + request.getRequestURI());
+
+        if(uid != null && password != null && request.getRequestURI().equals("/user/login")) {
+            log.error("LoginAuthenticationProcessingFilter 필터 여기까진 다행히 안 들어옴.. 휴");
             // 유저 확인
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(uid);
 
             // 비밀번호 확인
             if(!passwordEncoder.matches(password, userDetails.getPassword())) {
@@ -42,11 +52,17 @@ public class CustomSecurityFilter extends OncePerRequestFilter {
             }
 
             // 인증 객체 생성 및 등록
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             context.setAuthentication(authentication);
 
             SecurityContextHolder.setContext(context);
+
+            // AccessToken, RefreshToken 생성 및 헤더 추가
+            String accessToken = jwtService.createAccessToken(uid);
+            String refreshToken = jwtService.createRefreshToken();
+
+            jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
         }
 
         filterChain.doFilter(request, response);
