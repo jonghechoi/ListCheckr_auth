@@ -1,6 +1,6 @@
 package com.example.auth.repository;
 
-import com.example.auth.domain.dto.IdAndPassword;
+import com.example.auth.domain.User;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -34,14 +34,6 @@ public class AuthRepository {
             valueOperations.set(userRequestDtoFromKfaka.getUid(), userRequestDtoFromKfaka);
             return true;
         }
-    }
-
-    public boolean loginByIdAndPassword(IdAndPassword idAndPassword) {
-        Object userData = valueOperations.get(idAndPassword.getUid());
-        LinkedHashMap<String, Object> userDataMap = (LinkedHashMap<String, Object>) userData;
-        UserRequestDtoFromKfaka map = objectMapper.convertValue(userDataMap, UserRequestDtoFromKfaka.class);
-
-        return idAndPassword.getUid().equals(map.getUid()) || idAndPassword.getPassword().equals(map.getPassword());
     }
 
     public boolean isUidExist(String uid) {

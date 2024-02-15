@@ -2,7 +2,6 @@ package com.example.auth.service.impl;
 
 import com.example.auth.domain.User;
 import com.example.auth.domain.UserRoleEnum;
-import com.example.auth.domain.dto.IdAndPassword;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

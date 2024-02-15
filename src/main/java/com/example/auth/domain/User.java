@@ -1,5 +1,7 @@
 package com.example.auth.domain;
 
+import com.example.auth.domain.dto.MemberChanged;
+import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.example.auth.global.jwt.service.impl.JwtServiceImpl;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +32,6 @@ public class User {
         this.name = name;
         this.role = role;
         this.refreshToken = refreshToken;
-    }
-
-    public void updateRefreshToken(String refreshToken) {
-
     }
 
     @Override
