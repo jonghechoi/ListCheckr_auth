@@ -55,6 +55,8 @@ public class LoginAuthenticationProcessingFilter extends OncePerRequestFilter {
                 UserDetailsImpl userDetailsImpl = (UserDetailsImpl) userDetails;
                 response.setHeader(ROLE, userDetailsImpl.getUser().getRole().getAuthority());
 
+                log.info("Uid : {}, Password : {}", userDetailsImpl.getUser().getUid(), userDetailsImpl.getUser().getPassword());
+
                 // 인증 객체 생성 및 등록
                 SecurityContext context = SecurityContextHolder.getContext();
                 Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

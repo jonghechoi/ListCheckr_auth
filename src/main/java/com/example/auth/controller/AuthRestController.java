@@ -20,7 +20,7 @@ public class AuthRestController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login() {
-        return new ResponseEntity<>("ok", HttpStatus.OK);
+        return new ResponseEntity<>("Login success", HttpStatus.OK);
     }
 
     @GetMapping("/login/jwt-test")

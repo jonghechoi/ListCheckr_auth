@@ -31,8 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
                                 .requestMatchers("/user/login").permitAll()
-                                .requestMatchers("/user/login/jwt-test").hasRole("USER")
-                                .requestMatchers("/user/login/jwt-test-refreshtoken").permitAll()
+//                                .requestMatchers("/user/login/jwt-test").hasRole("USER")
+//                                .requestMatchers("/user/login/jwt-test-refreshtoken").permitAll()
                 )
                 .addFilterBefore(LoginAuthenticationProcessingFilter.builder()
                         .userDetailsService(userDetailsService)
