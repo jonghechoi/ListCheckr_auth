@@ -1,0 +1,8 @@
+### POST SELECT - 로그인
+POST http://localhost:8086/api/user/login
+Content-Type: application/json
+
+{
+  "uid": "aaa",
+  "password": "aaa"
+}

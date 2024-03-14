@@ -16,7 +16,6 @@ public class UserRequestDtoFromKfaka {
     private UserRoleEnum role;
     private String refreshToken;
 
-
     public static UserRequestDtoFromKfaka kafkaDataToUser(MemberChanged memberChanged) {
         UserRequestDtoFromKfaka userRequestDtoFromKfaka = new UserRequestDtoFromKfaka();
         userRequestDtoFromKfaka.setId(memberChanged.getId());

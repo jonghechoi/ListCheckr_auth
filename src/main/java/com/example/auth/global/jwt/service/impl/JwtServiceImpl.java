@@ -2,7 +2,6 @@ package com.example.auth.global.jwt.service.impl;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.auth.domain.dto.UserRequestDtoFromKfaka;
 import com.example.auth.global.jwt.service.JwtService;
 import com.example.auth.repository.AuthRepository;

@@ -17,7 +17,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if(!authRepository.isUidExist(username)) {
-            throw new RuntimeException("일치하는 유저가 없습니다~~~!");
+            throw new RuntimeException("일치하는 유저가 없습니다.");
         }
 
         UserRequestDtoFromKfaka userRequestDtoFromKfaka = authRepository.getUser(username);

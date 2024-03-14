@@ -37,7 +37,7 @@ public class LoginAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if(request.getRequestURI().equals("/user/login")) {
+        if(request.getRequestURI().equals("/api/user/login")) {
             Map<String, String> requestBodyMap = getBody(request);
             String uid = requestBodyMap.get("uid");
             String password = requestBodyMap.get("password");
