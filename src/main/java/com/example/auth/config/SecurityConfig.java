@@ -1,4 +1,4 @@
-package com.example.auth.global.config;
+package com.example.auth.config;
 
 import com.example.auth.global.jwt.filter.JwtAuthenticationProcessingFilter;
 import com.example.auth.global.jwt.service.impl.JwtServiceImpl;
